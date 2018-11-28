@@ -1,6 +1,8 @@
 package com.nerallan.android.nerdlauncher;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -43,6 +45,7 @@ public class NerdLauncherFragment extends Fragment {
         return view;
     }
 
+    // create an instance of RecyclerView.Adapter and assign it to the RecyclerView object
     private void setupAdapter(){
         // Intent i = new Intent(Intent.ACTION_SEND);
         // i = Intent.createChooser(i, getString(R.string.send_report));
@@ -78,13 +81,14 @@ public class NerdLauncherFragment extends Fragment {
     }
 
 
-    private class ActivityHolder extends RecyclerView.ViewHolder {
+    private class ActivityHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ResolveInfo mResolveInfo;
         private TextView mNameTextView;
 
         public ActivityHolder(View itemView) {
             super(itemView);
             mNameTextView = (TextView) itemView;
+            mNameTextView.setOnClickListener(this);
         }
 
         public void bindActivity(ResolveInfo pResolveInfo){
@@ -93,13 +97,24 @@ public class NerdLauncherFragment extends Fragment {
             String appName = mResolveInfo.loadLabel(pm).toString();
             mNameTextView.setText(appName);
         }
+
+        @Override
+        public void onClick(View v) {
+            // To create an explicit intent, you must extract the package name and the name of the activity class from ResolveInfo.
+            // This data can be obtained from the ResolveInfo part with the name ActivityInfo.
+            ActivityInfo activityInfo = mResolveInfo.activityInfo;
+            Intent i = new Intent(Intent.ACTION_MAIN)
+                    // 2nd argument - class name
+                    .setClassName(activityInfo.applicationInfo.packageName, activityInfo.name);
+            startActivity(i);
+        }
     }
 
 
     private class ActivityAdapter extends RecyclerView.Adapter<ActivityHolder> {
         private final List<ResolveInfo> mActivities;
 
-        private ActivityAdapter(List<ResolveInfo> pActivities) {
+        public ActivityAdapter(List<ResolveInfo> pActivities) {
             mActivities = pActivities;
         }
 
